@@ -1,9 +1,8 @@
-package main
+package read_db
 
 import (
 	"encoding/json"
 	"encoding/xml"
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -69,38 +68,26 @@ func getDataFromXml(strData string) Recipes {
 	return data
 }
 
-func outputJson(data *Recipes) {
+func OutputJson(data *Recipes) {
 	jsonData, _ := json.MarshalIndent(*data, "", "    ")
 	fmt.Println(string(jsonData))
 }
 
-func outputXml(data *Recipes) {
+func OutputXml(data *Recipes) {
 	xmlData, _ := xml.MarshalIndent(*data, "", "    ")
 	fmt.Println(string(xmlData))
 }
 
-func readDB(fName *string) Recipes {
+func ReadDB(fName *string) Recipes {
 	var data Recipes
 	strData := readStrDB(fName)
 	format := getFileFormat(fName)
 	if format == "json" {
 		data = getDataFromJson(strData)
-		outputXml(&data)
 	} else if format == "xml" {
 		data = getDataFromXml(strData)
-		outputJson(&data)
 	} else {
 		fmt.Println("ERROR: file format")
 	}
 	return data
-}
-
-func main() {
-	fName := flag.String("f", "", "file name")
-	flag.Parse()
-	if *fName == "" {
-		fmt.Println("ERROR: file name")
-	} else {
-		readDB(fName)
-	}
 }
