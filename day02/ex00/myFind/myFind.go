@@ -21,6 +21,15 @@ func getRealPath(path string) string {
 	return realPath
 }
 
+func checkSymlink(path string) bool {
+	file, err := os.Open(path)
+	if err != nil {
+		return false
+	}
+	file.Close()
+	return true
+}
+
 func Find(addr string, fl *Fl) {
 	err := filepath.Walk(addr,
 		func(path string, info os.FileInfo, err error) error {
@@ -31,7 +40,11 @@ func Find(addr string, fl *Fl) {
 				if info.Mode().Type()&fs.ModeSymlink == 0 {
 					fmt.Println(path)
 				} else {
-					fmt.Printf("%s -> %s", path, getRealPath(path))
+					realPath := getRealPath(path)
+					if ok := checkSymlink(path); ok == false {
+						realPath = "[broken]\n"
+					}
+					fmt.Printf("%s -> %s", path, realPath)
 				}
 			}
 			return nil
@@ -51,7 +64,11 @@ func Find_ext(addr, ext string) {
 				if info.Mode().Type()&fs.ModeSymlink == 0 {
 					fmt.Println(path)
 				} else {
-					fmt.Printf("%s -> %s", path, getRealPath(path))
+					realPath := getRealPath(path)
+					if ok := checkSymlink(path); ok == false {
+						realPath = "[broken]\n"
+					}
+					fmt.Printf("%s -> %s", path, realPath)
 				}
 			}
 			return nil
