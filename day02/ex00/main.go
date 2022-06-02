@@ -25,9 +25,6 @@ func main() {
 		*fl.Sl, *fl.F, *fl.D = true, true, true
 	}
 
-	if *fl.Ext == "" {
-		find.Find(flag.Arg(0), &fl)
-	} else {
-		find.Find_ext(flag.Arg(0), *fl.Ext)
-	}
+	dirName := flag.Arg(0)
+	find.Find(dirName, &fl)
 }
