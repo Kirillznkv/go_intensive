@@ -15,7 +15,6 @@ func wc_w(filename string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer file.Close()
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		res += uint(len(strings.Split(scanner.Text(), " ")))
@@ -37,7 +36,6 @@ func wc_l(filename string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer file.Close()
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		res++
@@ -59,7 +57,6 @@ func wc_m(filename string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer file.Close()
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		res += uint(len(scanner.Text()))
