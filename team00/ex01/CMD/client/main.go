@@ -12,12 +12,14 @@ import (
 	"log"
 )
 
-func forecastLog(i int, f, m, s float64) {
-	fmt.Println(i, ":", "Frequency:", f, "Mean:", m, "STD:", s)
+func forecastLog(i int, data *pb.Response, m, s float64) {
+	fmt.Printf("%d: (mean:%f std:%f) ", i, m, s)
+	fmt.Printf("%s %f %s\n", data.SessionId, data.Frequency, data.Timestamp.AsTime())
 }
 
-func anomalyLog(f float64) {
-	fmt.Println("Anomaly:", f)
+func anomalyLog(data *pb.Response) {
+	fmt.Printf("Anomaly: ")
+	fmt.Printf("%s %f %s\n", data.SessionId, data.Frequency, data.Timestamp.AsTime())
 }
 
 func connectToServ(addr string) *grpc.ClientConn {
@@ -40,7 +42,7 @@ func getDoStream(conn *grpc.ClientConn) pb.Nlo_DoClient {
 	return stream
 }
 
-func execDo(ch chan float64, conn *grpc.ClientConn) {
+func execDo(ch chan *pb.Response, conn *grpc.ClientConn) {
 	stream := getDoStream(conn)
 	for {
 		data, err := stream.Recv()
@@ -50,7 +52,7 @@ func execDo(ch chan float64, conn *grpc.ClientConn) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		ch <- data.Frequency
+		ch <- data
 	}
 	close(ch)
 }
@@ -58,19 +60,19 @@ func execDo(ch chan float64, conn *grpc.ClientConn) {
 func findForecast(conn *grpc.ClientConn) {
 	forecastArr := make([]float64, 1000)
 	var mean, std float64
-	ch := make(chan float64)
+	ch := make(chan *pb.Response)
 	i := 0
 	go execDo(ch, conn)
 	for {
 		data := <-ch
 		if i < 1000 {
-			forecastArr[i] = data
+			forecastArr[i] = data.Frequency
 			mean, std = stat.MeanStdDev(forecastArr[:i+1], nil)
 			forecastLog(i+1, data, mean, std)
 			if i == 1000 {
 				forecastArr = nil
 			}
-		} else if data < mean-(std**kFlag) || data > mean+(std**kFlag) {
+		} else if data.Frequency < mean-(std*(*kFlag)) || data.Frequency > mean+(std*(*kFlag)) {
 			anomalyLog(data)
 		}
 		i++

@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package api;
+
+import "google/protobuf/timestamp.proto";
+option go_package = "/nlo";
+
+service Nlo {
+    rpc Do(Request) returns (stream Response) {}
+}
+
+message Request {
+}
+
+message Response {
+	string session_id = 1;
+	double frequency = 2;
+	google.protobuf.Timestamp timestamp = 3;
+}
